@@ -13,13 +13,11 @@ def alarm(total_seconds):
 
     print("\n⏰ TIME UP!")
 
-    # Play alarm sound
     for _ in range(5):
         winsound.Beep(1000, 700)
         time.sleep(0.3)
 
 
-# -------- INPUT --------
 minutes = int(input("Enter minutes: "))
 seconds = int(input("Enter seconds: "))
 
