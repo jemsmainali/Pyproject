@@ -1,52 +1,49 @@
 import pygame
 import random
 
-# Initialize Pygame
 pygame.init()
 
-# Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
-# Screen dimensions
 WIDTH = 640
 HEIGHT = 480
-
-# Block size
 BLOCK_SIZE = 20
-
-# FPS
 FPS = 10
 
-# Font
 FONT = pygame.font.SysFont(None, 35)
 
-def draw_snake(snake_body):
+def draw_snake(screen, snake_body):
     for block in snake_body:
         pygame.draw.rect(screen, GREEN, [block[0], block[1], BLOCK_SIZE, BLOCK_SIZE])
 
-def draw_food(food_pos):
+def draw_food(screen, food_pos):
     pygame.draw.rect(screen, RED, [food_pos[0], food_pos[1], BLOCK_SIZE, BLOCK_SIZE])
 
-def message(msg, color):
+def message(screen, msg, color):
     text = FONT.render(msg, True, color)
     screen.blit(text, [WIDTH / 6, HEIGHT / 3])
 
+def show_score(screen, score):
+    value = FONT.render("Score: " + str(score), True, WHITE)
+    screen.blit(value, [10, 10])
+
 def game_loop():
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Snake Game")
+
     game_over = False
     game_close = False
 
-    # Initial snake position and body
     x = WIDTH / 2
     y = HEIGHT / 2
     x_change = 0
     y_change = 0
-    snake_body = []
+    snake_body = [[x, y]]
     length_of_snake = 1
 
-    # Food position
     food_x = round(random.randint(0, WIDTH - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE
     food_y = round(random.randint(0, HEIGHT - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE
 
@@ -55,7 +52,7 @@ def game_loop():
     while not game_over:
         while game_close:
             screen.fill(BLACK)
-            message("You Lost! Press Q-Quit or C-Play Again", RED)
+            message(screen, "You Lost! Press Q-Quit or C-Play Again", RED)
             pygame.display.update()
 
             for event in pygame.event.get():
@@ -67,7 +64,7 @@ def game_loop():
                         game_over = True
                         game_close = False
                     if event.key == pygame.K_c:
-                        game_loop()
+                        return game_loop()  # restart safely
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -86,7 +83,6 @@ def game_loop():
                     y_change = BLOCK_SIZE
                     x_change = 0
 
-        # Boundary check
         if x >= WIDTH or x < 0 or y >= HEIGHT or y < 0:
             game_close = True
 
@@ -94,24 +90,21 @@ def game_loop():
         y += y_change
         screen.fill(BLACK)
 
-        # Draw food
-        draw_food([food_x, food_y])
+        draw_food(screen, [food_x, food_y])
 
-        # Snake head
         snake_head = [x, y]
         snake_body.append(snake_head)
 
         if len(snake_body) > length_of_snake:
             del snake_body[0]
 
-        # Check self-collision
         for block in snake_body[:-1]:
             if block == snake_head:
                 game_close = True
 
-        draw_snake(snake_body)
+        draw_snake(screen, snake_body)
+        show_score(screen, length_of_snake - 1)
 
-        # Check food collision
         if x == food_x and y == food_y:
             food_x = round(random.randint(0, WIDTH - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE
             food_y = round(random.randint(0, HEIGHT - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE
@@ -122,9 +115,5 @@ def game_loop():
 
     pygame.quit()
     quit()
-
-# Set up screen
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Snake Game")
 
 game_loop()
